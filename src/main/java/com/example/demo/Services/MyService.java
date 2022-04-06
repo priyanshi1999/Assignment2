@@ -1,6 +1,8 @@
 package com.example.demo.Services;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 //import com.google.gson.Gson;    
 import java.util.ArrayList;
 import java.util.List;
@@ -141,7 +143,6 @@ public class MyService {
 			{
 				Object obj = jsonParser.parse(reader);
 				employeeList= (JSONObject) obj;
-//	            employeeList = (JSONArray) obj;
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -162,6 +163,24 @@ public class MyService {
 			else {
 				code=1;
 				writeInInternFile(model, empId);
+			}
+			return code;
+		}
+
+		public int deleteEmployeeRecord(String empId) {
+			String res= readRecordFile(empId);
+			int code= 0;
+			if(res.equals("freshRecord")) {
+				code=0; //record doesnt exist.
+			}
+			else {
+				//record exists, delete it.
+				code=1;
+				try {
+					Files.deleteIfExists(Paths.get("F://Assign2Data/"+empId+".json"));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 			return code;
 		}

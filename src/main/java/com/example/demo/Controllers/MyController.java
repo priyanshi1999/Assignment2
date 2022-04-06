@@ -4,6 +4,7 @@ import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,9 +41,13 @@ public class MyController {
 		}
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
-//	
-//	@DeleteMapping(name = "/objects/{empId}")
-//	public void deleteJsonObject() {
-//		
-//	}
+	
+	@DeleteMapping("/objects/{empId}")
+	public ResponseEntity<HttpStatus> deleteJsonObject(@PathVariable String empId) {
+		int statusCode= myService.deleteEmployeeRecord(empId);
+		if(statusCode==0) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
 }
