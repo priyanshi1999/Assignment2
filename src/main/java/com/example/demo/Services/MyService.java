@@ -1,6 +1,8 @@
 package com.example.demo.Services;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 //import com.google.gson.Gson;    
 import java.util.ArrayList;
 import java.util.List;
@@ -18,25 +20,26 @@ public class MyService {
 	
 	
 	@SuppressWarnings("unchecked")
-	public void addJson(JSONObject model){
+	public int addJson(JSONObject model){
 		JSONObject obj=model;
-			
+		int code=0;
 		//extracting employeeId from postman body. (employeeId from the new record that is to be added via postman).
 		String empID= (String) obj.get("empId");
 		System.out.println("Checking ID: "+empID);
 		String val= readRecordFile(empID);
 		if(val.equals("freshRecord")) {
+			code=1;
 			// Add empId to records (perform writeOperation on record file) and create a new file with file name as empId.
 			writeInRecordFile(empID);
 			createNewFile(empID);
 			//READ IN INTERN FILE.
 			writeInInternFile(model, empID);
-//			JSONArray list= readInternFile(empID);
-//			writeInInternFile(list, obj, empID);
 		}
 		if(val.equals("alreadyExists")) {
+			code=0;
 			System.out.println("RECORD ALREADY EXISTS!!");
 		}
+		return code;
 	}		
 
 	@SuppressWarnings("unchecked")
@@ -48,7 +51,7 @@ public class MyService {
 	@SuppressWarnings("unchecked")
 	public String readRecordFile(String empId) {
 		JSONParser jsonParserReadRecords = new JSONParser();
-		String res="";
+		String res="freshRecord";
 		try(FileReader recordsReader= new FileReader("F://Assign2Data/Records.json");) 
 		{
 			System.out.println("RecordReader: "+recordsReader);
@@ -60,14 +63,16 @@ public class MyService {
 				res= "freshRecord";
 			}
 			else {
+				System.out.println("inside else block");
 				for(int i=0; i<listOfIds.size(); i++) {
 					if(empId.equals(listOfIds.get(i))) {
+						System.out.println("inside already exists");
 						res="alreadyExists";
 						break;
 					}
-					else {
-						res= "freshRecord";
-					}
+//					else {
+//						res= "freshRecord";
+//					}
 				}
 			}
 		} catch (FileNotFoundException e1) {
@@ -134,11 +139,10 @@ public class MyService {
 		public JSONObject readInternFile(String empId) {
 			JSONParser jsonParser = new JSONParser();
 			JSONObject employeeList = null;
-			try (FileReader reader = new FileReader("F://Assign2Data/"+"INT"+empId+".json"))
+			try (FileReader reader = new FileReader("F://Assign2Data/"+empId+".json"))
 			{
 				Object obj = jsonParser.parse(reader);
 				employeeList= (JSONObject) obj;
-//	            employeeList = (JSONArray) obj;
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -148,41 +152,38 @@ public class MyService {
 			}
 			return employeeList;
 		}
+
+		public int updateEmployee(JSONObject model, String empId) {
+			String res= readRecordFile(empId);
+			int code=0;
+			if(res.equals("freshRecord")) {
+				//display record doesnt exists
+				code=0;
+			}
+			else {
+				code=1;
+				writeInInternFile(model, empId);
+			}
+			return code;
+		}
+
+		public int deleteEmployeeRecord(String empId) {
+			String res= readRecordFile(empId);
+			int code= 0;
+			if(res.equals("freshRecord")) {
+				code=0; //record doesnt exist.
+			}
+			else {
+				//record exists, delete it.
+				code=1;
+				try {
+					Files.deleteIfExists(Paths.get("F://Assign2Data/"+empId+".json"));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			return code;
+		}
 		
-//	public JSONArray readInternFile(String empId) {
-//		JSONParser jsonParser = new JSONParser();
-//		JSONArray employeeList = null;
-//
-//        try (FileReader reader = new FileReader("F://Assign2Data/"+empId))
-//        {
-//            Object obj = jsonParser.parse(reader);
-//            employeeList = (JSONArray) obj;
-//            System.out.println("DATA THAT HAS BEEN READ: "+employeeList);
-//            for(int i=0; i<employeeList.size();i++) {
-//            	JSONObject o= (JSONObject) employeeList.get(i);
-//            	System.out.println(o.get("empId"));
-//            }
-//            //System.out.println("GETTING ID OF READ DATA: "+employeeList.get("empId"));
-//        } catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		} catch (ParseException e) {
-//			e.printStackTrace();
-//		}
-//        return employeeList;
-//	}
-	
-	
-	//write inside the new intern file
-//	public void writeInInternFile(JSONArray list, JSONObject str, String empId) {
-//	    try (FileWriter file = new FileWriter("F://Assign2Data/"+empId)) {
-//	           file.write(((JSONArray) list).toJSONString()); 
-//	            file.flush();
-//	        } catch (IOException e) {
-//	            e.printStackTrace();
-//	        }
-//	}
-	
 
 }
