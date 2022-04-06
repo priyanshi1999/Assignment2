@@ -1,11 +1,13 @@
 package com.example.demo.Controllers;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.Services.MyService;
@@ -17,8 +19,12 @@ public class MyController {
 	MyService myService;
 	
 	@PostMapping("/objects")
-	public void addJsonObject(@RequestBody JSONObject model) {
-		myService.addJson(model);
+	public ResponseEntity<HttpStatus> addJsonObject(@RequestBody JSONObject model) {
+		int statusCode= myService.addJson(model);
+		if(statusCode == 0) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
 	@GetMapping("/objects/{empId}")
@@ -26,10 +32,14 @@ public class MyController {
 		return myService.getJson(empId);
 	}
 	
-//	@PostMapping(name = "/objects/{empId}")
-//	public void updateJsonObject() {
-//		
-//	}
+	@PutMapping("/objects/{empId}")
+	public ResponseEntity<HttpStatus> updateJsonObject(@RequestBody JSONObject model, @PathVariable String empId) {
+		int statusCode=  myService.updateEmployee(model, empId);
+		if(statusCode==0) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
 //	
 //	@DeleteMapping(name = "/objects/{empId}")
 //	public void deleteJsonObject() {
