@@ -1,6 +1,9 @@
 package com.example.demo.Services;
 
 import java.io.*;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 //import com.google.gson.Gson;    
@@ -154,6 +157,8 @@ public class MyService {
 		}
 
 		public int updateEmployee(JSONObject model, String empId) {
+			//if lock exists, do not proceed further. Else, first apply the lock and execute update service. (line 158).
+			//before returning, 
 			String res= readRecordFile(empId);
 			int code=0;
 			if(res.equals("freshRecord")) {
@@ -183,6 +188,48 @@ public class MyService {
 				}
 			}
 			return code;
+		}
+
+		public void lockRecord(String empId) {
+			try {
+				File file= new File("F://Assign2Data/"+empId+".json");
+				if(file.exists()==true) {
+					boolean result= file.setReadOnly();
+					if(result==true) {
+						System.out.println("FILE LOCKED SUCCESSFULLY!");
+					}
+					else {
+						System.out.println("FILE NOT LOCKED");
+					}
+				}
+				else {
+					System.out.println("FILE DNE");
+				}
+			}
+			catch(Exception e) {
+				System.out.println(e.toString());
+			}
+		}
+
+		public void unlockRecord(String empId) throws IOException {
+			try {
+				File file= new File("F://Assign2Data/"+empId+".json");
+				if(file.exists()==true) {
+					boolean result= file.setWritable(true);
+					if(result==true) {
+						System.out.println("FILE UNLOCKED SUCCESSFULLY!");
+					}
+					else {
+						System.out.println("FILE CANNOT LOCKED");
+					}
+				}
+				else {
+					System.out.println("FILE DNE");
+				}
+			}
+			catch(Exception e) {
+				System.out.println(e.toString());
+			}
 		}
 		
 
