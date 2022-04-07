@@ -1,5 +1,7 @@
 package com.example.demo.Controllers;
 
+import java.io.IOException;
+
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -49,5 +51,15 @@ public class MyController {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 		return new ResponseEntity<>(HttpStatus.OK);
+	}
+	
+	@PostMapping("/objects/{empId}/lock")
+	public void lockEmployeeRecord(@PathVariable String empId) throws IOException {
+		myService.lockRecord(empId);
+	}
+	
+	@PostMapping("/objects/{empId}/unlock")
+	public void unlockEmployeeRecord(@PathVariable String empId) throws IOException {
+		myService.unlockRecord(empId);
 	}
 }
